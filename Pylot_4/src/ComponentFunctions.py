@@ -1,7 +1,4 @@
 from steward import *
-import pylot_cfg
-import CoPylot
-import time
 
 
 class IT_ECBuildings():
@@ -14,6 +11,11 @@ class IT_ECBuildings():
         ##self.supported_components = ["enricher"]
 
     def Deploy(self):
+        """
+        Grabs the artifact, creates the deploy.sh script and executes it.
+        This pushes everything into HDFS and sets up the EC Buildings directories
+        with job.property files already mostly populated.
+        """
         echo('Getting artifact for ECBuildings ' + pylot_cfg.ec_buildings_version)
         CoPylot._get_component(path = pylot_cfg.ec_buildings_path + 'v' + pylot_cfg.ec_buildings_version + '/',
                        target = pylot_cfg.ec_buildings_name,
@@ -27,17 +29,16 @@ class IT_ECBuildings():
         self.deploy_directory = '/disk1/hadoopUsers/earthcoredpl/Josh/p/ec_building/'
 
     def Configure(self):
-        ## Edit job.properties files for:
-        ## buildingMatch
-        ## elevate
-        ## enricher
-        ## landmarkMatch
+        """
+        Creates job.properties files and populates necessary settings.
+        """
         for item in ["buildingMatch", "elevate", "enricher", "landmarkMatch"]:
             echo('Configuring ' + item)
             jobprop_orig = open(self.deploy_directory + item + '/job.properties', 'r')
             pylot_job = open(self.deploy_directory + item +'/pylot_job.properties', 'w')
             orig_lines = jobprop_orig.readlines()
             
+            ## TODO: Convert to dictionary(?) and pass to a Steward function
             for line in orig_lines:
                 if line == "boundingBox=\"\"\n" or line == "boundingBox=\n":
                     line = "boundingBox=\"" + pylot_cfg.bounding_box + "\"\n"
@@ -58,9 +59,6 @@ class IT_ECBuildings():
                 pylot_job.write(line)
             jobprop_orig.close()
             pylot_job.close()
-        
-        ## TODO: Building Match requires rmob stuff.
-
         ## TODO: Learn steps for:
         ## delete
         ## extractor
@@ -68,33 +66,29 @@ class IT_ECBuildings():
         ## roadCollisionDetector
 
     def Run(self):
+        """
+        Execute the oozie workflows.
+        One at a time, polling for completion before moving on.
+        """
         for component in self.components:
             if component not in self.supported_components:
                 echo(component + ' not supported.')
             else:
-                echo('Running ' + component)
-                #subprocess.call('oozie job -oozie http://sachidn002:11000/oozie/ -config ' + self.deploy_directory + component + '/pylot_job.properties -run', shell=True)
-                #subprocess.call('echo oozie job -oozie http://sachidn002:11000/oozie/ -config ' + self.deploy_directory + component + '/pylot_job.properties -run', shell=True)
-                job_id = call_return("oozie job -oozie http://sachidn002:11000/oozie/ -config " + self.deploy_directory + component + "/pylot_job.properties -run | awk '{print $NF}'")
-                job_id = job_id.strip('\n')
-                echo('job: ' + job_id)
+                job_id = run_oozie_workflow(self.deploy_directory, component)
                 status = ""
                 x = 0
                 while (x < 120):
                     x += 1
                     time.sleep(60)
                     status = get_oozie_status(job_id)
-                    status = status.strip('\n')
                     echo(component + ' run ' + job_id + ': ' + status)
                     if (status == "KILLED" or status == "FAILED" or status == "SUCCEEDED"):
                         break;
                     elif (status == "RUNNING"):
                         echo('Runtime: ' + str(x) + ' minutes.')
                     else:
-                        subprocess.call('echo Status set to "' + status + '" - Assuming something is wrong, abort.', shell=True)
+                        echo('Status set to "' + status + '" - Assuming something is wrong, abort.')
                         break;
-                ## Check Status:
-                ## oozie job -oozie http://sachidn002:11000/oozie/ -info 0000708-131210131245126-oozie-oozi-W | grep "Status" | grep ":" | awk '{print $NF}'
 
 
     ## Custom Functions
@@ -114,20 +108,12 @@ class IT_ECBuildings():
         deploy_script.write('countryCachePath="' + pylot_cfg.countryCachePath + '"\n')
         deploy_script.write('rmobCacheName="' + pylot_cfg.rmobCacheName + '"\n')
         deploy_script.write('\n# The zip file to extract onto the current edge node\n')
-        #deploy_script.write('edgeZip=`find $(dirname $0) -type f -name "ec-building-edge-*.zip"`\n')
         deploy_script.write('edgeZip=`find ' + pylot_cfg.working_directory + ' -type f -name ec-building-edge-*.zip`\n')
-        #deploy_script.write('edgeZip=`find ../p_test/ -type f -name ec-building-edge-*.zip`\n')
-        #deploy_script.write('edgeZip="' + pylot_cfg.working_directory + 'ec_building_deploy/ec-building-edge-' + pylot_cfg.ec_buildings_version + '.zip"\n')
         deploy_script.write('\n# The zip file to extract onto HDFS\n')
-        #deploy_script.write('hadoopZip=`find $(dirname $0) -type f -name "ec-building-hadoop-*.zip"`\n')
         deploy_script.write('hadoopZip=`find ' + pylot_cfg.working_directory + ' -type f -name ec-building-hadoop-*.zip`\n')
-        #deploy_script.write('hadoopZip=`find ../p_test/ -type f -name ec-building-hadoop-*.zip`\n')
-        #deploy_script.write('hadoopZip="' + pylot_cfg.working_directory + 'ec_building_deploy/ec_building_hadoop-' + pylot_cfg.ec_buildings_version + '.zip" -hadoopZip"\n')
         deploy_script.write('\n# Clears the installation directories before extracting\n')
         deploy_script.write('clean="-clean"\n')
         deploy_script.write('\nhadoop jar ' + pylot_cfg.working_directory + 'ec_building_deploy/deploy-jar-with-dependencies.jar com.nokia.ec.HadoopExtractor -jobTracker $jobTracker -nameNode $nameNode -ecServer $ecServer -demServer $demServer -lroServer $lroServer -egisServer $egisServer -hdfsInstallPath $hdfsInstallPath -cacheUser $cacheUser -cacheProduct $cacheProduct -countryCachePath $countryCachePath -rmobCacheName $rmobCacheName -edgeZip $edgeZip -hadoopZip $hadoopZip $clean')
-        #deploy_script.write('\nhadoop jar deploy-jar-with-dependencies.jar com.nokia.ec.HadoopExtractor -jobTracker $jobTracker -nameNode $nameNode -ecServer $ecServer -demServer $demServer -lroServer $lroServer -egisServer $egisServer -hdfsInstallPath $hdfsInstallPath -cacheUser $cacheUser -cacheProduct $cacheProduct -countryCachePath $countryCachePath -rmobCacheName $rmobCacheName -edgeZip "' + pylot_cfg.working_directory + 'ec_building_deploy/ec_building_edge-*.zip" -hadoopZip "' + pylot_cfg.working_directory + 'ec_building_deploy/ec_building_hadoop-*.zip" $clean\n')
-        #deploy_script.write('"' + pylot_cfg.working_directory + 'ec_building_deploy/p-deploy.sh" 47L, 1726C\n')
         
         deploy_script.close()
         call('chmod 777 ' + pylot_cfg.working_directory + 'ec_building_deploy/p-deploy.sh')
@@ -140,9 +126,8 @@ def IT_3DLRP():
     """ Probably need to interact with either BPM API or EGIS """
     subprocess.call('echo 3DLRP not yet implemented.', shell=True)
 
-### Should this go with 3DLRP?
-#def IT_BuildingAttribution():
-#    subprocess.call('echo Running BuildingAttribution...', shell=True)
+def IT_BuildingAttribution():
+    subprocess.call('echo BuildingAttribution not yet implemented.', shell=True)
 
 def IT_OTD():
     subprocess.call('echo OTD not yet implemented.', shell=True)
@@ -154,7 +139,7 @@ def BCP():
     subprocess.call('echo BCP not yet implemented', shell=True)
 
 def IT_ECValidation():
-    subprocess.call('echo BCP not yet implemented', shell=True)
+    subprocess.call('echo Validations not yet implemented', shell=True)
     
     ### Migrate the validation database
     # cp /bison/EarthCore/Validation/v4.1/earthcore-4.1-assembly.zip
@@ -167,6 +152,6 @@ def IT_ECValidation():
     # ?
 
     ## Run the validation
-    # ?
-    # ?
-    # ?
+    # Set up job.properties, config-default.xml, h_config.xml
+    # Push files into HDFS (config-default, h_config, rule_configuration, rules.prop, workflow.xml, sofiles/(sofiles), lib/(jar file))
+    # oozie job -oozie http://schisadn101.hq.navteq.com:11000/oozie/ -config job.properties -run

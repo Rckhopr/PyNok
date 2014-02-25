@@ -29,7 +29,8 @@ countryCachePath = "/user/earthcoredpl/3dit/CountryGeoCache"
 
 ## TODO: Set up presets with logical names (E.g. "Chicago")
 bounding_box = "32.724600145464,32.704400963283,-117.14808449191,-117.17640716794"
-tile_file = "/user/earthcoredpl/3dit/Josh/p/"
+tile_file = "ChicagoTileJosh.txt"
+#tile_file = "/user/earthcoredpl/3dit/Josh/p/"
 
 ############
 

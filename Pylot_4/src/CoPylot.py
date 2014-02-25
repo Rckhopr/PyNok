@@ -1,15 +1,12 @@
-import subprocess
-import pylot_cfg
-
+from steward import *
 
 def _get_component(path, target, unzip):
-    subprocess.call('echo Grabbing component from '+ path + target + ' and putting it in: ' + pylot_cfg.working_directory, shell=True)
-    subprocess.call('cp ' + path + target + ' ' + pylot_cfg.working_directory, shell=True)
-    subprocess.call('chmod 777 ' + pylot_cfg.working_directory + '*.zip', shell=True)
+    echo('Grabbing component from ' + path + target + ' and putting it in: ' + pylot_cfg.working_directory)
+    call('cp ' + path + target + ' ' + pylot_cfg.working_directory)
+    call('chmod 777 ' + pylot_cfg.working_directory + '*.zip')
     if unzip:
-        subprocess.call('echo Unzipping..', shell=True)
-        subprocess.call('unzip ' + pylot_cfg.working_directory + target + ' -d ' + pylot_cfg.working_directory, shell=True)
-
+        echo('Unzipping...')
+        call('unzip ' + pylot_cfg.working_directory + target + ' -d ' + pylot_cfg.working_directory)
 
 
 ### Below moved to ComponentFunctions:

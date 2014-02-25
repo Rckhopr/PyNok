@@ -1,7 +1,5 @@
 import sys
-import ComponentFunctions
-import subprocess
-import pylot_cfg
+from steward import *
 
 def pylot_tests(argv):
     """
