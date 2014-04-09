@@ -12,17 +12,17 @@ def pylot_tests(argv):
     ## Hard Coded awesomeness!!
     
     ## Remove directory (if it exists), then create it.
-    subprocess.call('rm -R ' + pylot_cfg.working_directory, shell=True)
-    subprocess.call('mkdir ' + pylot_cfg.working_directory, shell=True)
+    call('rm -R ' + pylot_cfg.working_directory)
+    call('mkdir ' + pylot_cfg.working_directory)
     
     myClass = ComponentFunctions.IT_ECBuildings(components = ["buildingMatch", "elevate", "enricher", "landmarkMatch"])
     
     myClass.Deploy()
     myClass.Configure()
     myClass.Run()
-    subprocess.call('echo Run complete...', shell=True)
-    subprocess.call('echo Removing .pyc files...', shell=True)
-    subprocess.call('rm *.pyc', shell=True)
+    call('echo Run complete...')
+    call('echo Removing .pyc files...')
+    call('rm *.pyc')
 #    subprocess.call('echo Removing ' + pylot_cfg.working_directory, shell=True)
 #    subprocess.call('rm -R ' + pylot_cfg.working_directory, shell=True)
 #    subprocess.call('echo Removing ' + myClass.deploy_directory, shell=True)

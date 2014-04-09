@@ -9,27 +9,31 @@ import time
 
 def echo(my_string):
     """
-    Wraps subprocess.call to echo the given string
+    Prints to screen, with Pylot: prefix
     """
+    my_string = "Pylot:    " + my_string
     if not (pylot_cfg.debug):
-        subprocess.call('echo ' + my_string, shell=True)
+        #subprocess.call('echo ' + my_string, shell=True)
+        print my_string
     log(my_string)
 
 def echo_no_log(my_string):
     """
-    Wraps subprocess.call to echo the given string
+    Prints to screen, with Pylot: prefix
     Note: Does not call logging function
     """
+    my_string = "Pylot:    " + my_string
     if not (pylot_cfg.debug):
-        subprocess.call('echo ' + my_string, shell=True)
+        #subprocess.call('echo ' + my_string, shell=True)
+        print my_string
     else:
-        log('NoLog Call: ' + my_string)
+        log('(NoLog) ' + my_string)
 
 def log(my_string):
     """
     TODO: Log to a file (pylot.log probably)
     """
-    pass
+    print my_string
     ## Figure out logging
 
 def call(command_str):

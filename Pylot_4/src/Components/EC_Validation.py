@@ -5,7 +5,7 @@ def IT_ECValidation(Pylot_Component):
 
     def __init__(self, version):
         """
-        version = Numbers only. Ex. "4.1.4"
+        version: Numbers only. Ex. "4.1.4"
         """
         self.vers_num = version.strip('v')
         self.version = "v" + self.vers_num
@@ -17,16 +17,18 @@ def IT_ECValidation(Pylot_Component):
                     E.g. -- Setting up webservice & migrating DB.
         """
         echo("Getting artifact for EC-Validation " + self.version)
-        CoPylot._get_component(path = pylot_cfg.ec_validations_deployment,
+        self._get_component(path = pylot_cfg.ec_validations_deployment,
                                target = pylot_cfg.ec_validations_name,
                                unzip = True)
 
-    def Configure(self):
+    def Configure(self, test = "Default"):
         """
         Set up the property files.
         Push necessary files into HDFS.
+        
+        test: Defines the test to be configured.
         """
-        pass
+        self._config_xml()
 
     def Run(self):
         """

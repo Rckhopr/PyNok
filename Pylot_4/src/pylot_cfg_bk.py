@@ -1,12 +1,14 @@
+
+
 ## debug command used to prevent actual shell calls, just logs everything.
-debug = True
+debug = False
 
 ### Eventually replace this with a real .cfg file and parser instead of just importing
 
 
 
 ## Environment settings
-user = "robottest" ## Not sure I need this
+user = "earthcoredpl" ## Not sure I need this
 working_directory = "/disk1/hadoopUsers/" + user + "/Josh/p_test/"
 
 ec_buildings_version = "5.2"
