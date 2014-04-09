@@ -11,7 +11,8 @@ def echo(my_string):
     """
     Wraps subprocess.call to echo the given string
     """
-    subprocess.call('echo ' + my_string, shell=True)
+    if not (pylot_cfg.debug):
+        subprocess.call('echo ' + my_string, shell=True)
     log(my_string)
 
 def echo_no_log(my_string):
@@ -19,7 +20,10 @@ def echo_no_log(my_string):
     Wraps subprocess.call to echo the given string
     Note: Does not call logging function
     """
-    subprocess.call('echo ' + my_string, shell=True)
+    if not (pylot_cfg.debug):
+        subprocess.call('echo ' + my_string, shell=True)
+    else:
+        log('NoLog Call: ' + my_string)
 
 def log(my_string):
     """
@@ -33,7 +37,8 @@ def call(command_str):
     Wraps subprocess.call
     Does not give a return value
     """
-    subprocess.call(command_str, shell=True)
+    if not (pylot_cfg.debug):
+        subprocess.call(command_str, shell=True)
     log(command_str)
 
 def call_return(command_str):
@@ -42,7 +47,10 @@ def call_return(command_str):
     Passes return value through
     """
     log(command_str)
-    return subprocess.check_output(command_str, shell=True)
+    if not (pylot_cfg.debug):
+        return subprocess.check_output(command_str, shell=True)
+    else:
+        return 'Debug_Enabled'
 
 def get_oozie_status(job_id):
     """

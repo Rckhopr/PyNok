@@ -1,6 +1,30 @@
 from steward import *
 
+
+class Pylot_Component():
+    """
+    This is a shell class that all Components are derived from.
+    """ 
+    def __init__(self):
+        pass
+    
+    ## assert(0) because this class should never be directly used.
+    def Deploy(self):
+        assert(0)
+    
+    def Configure(self):
+        assert(0)
+    
+    def Run(self):
+        assert(0)
+
 def _get_component(path, target, unzip):
+    """
+    Gets the requested components, and unzips if it asked.
+    path: directory where component can be found
+    target: name of file to copy
+    unzip: True/False, whether or not to unzip the file
+    """
     echo('Grabbing component from ' + path + target + ' and putting it in: ' + pylot_cfg.working_directory)
     call('cp ' + path + target + ' ' + pylot_cfg.working_directory)
     call('chmod 777 ' + pylot_cfg.working_directory + '*.zip')

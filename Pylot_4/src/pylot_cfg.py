@@ -1,5 +1,8 @@
 
 
+## debug command used to prevent actual shell calls, just logs everything.
+debug = False
+
 ### Eventually replace this with a real .cfg file and parser instead of just importing
 
 
@@ -62,8 +65,11 @@ hdfs_oozie_interface = "http://sachidn002:11000/oozie/"
 ############
 
 ## Component settings
+## Relocate these to component files? Hard-coded?
 ec_buildings_path = "/bison/EarthCore/Buildings/"
 ec_buildings_name = "ec-building-deploy-*.zip"
+ec_validations_deployment = "/bison/EarthCore/Validation/"
+ec_validations_name = "earthcore-*-assembly.zip"
 
 
 ## Old stuff
