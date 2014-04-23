@@ -28,7 +28,12 @@ def IT_ECValidation(Pylot_Component):
         
         test: Defines the test to be configured.
         """
-        self._config_xml()
+        self._config_xml('Config Default')
+        self._config_properties('Job Properties')
+        self._config_properties('rule_configuration_file.txt')
+        
+        ## Blow away HDFS directory... -rm -f -r for recursive force (ignore non empty)
+        ## Push to HDFS: config-default.xml, rule_configuration_file.txt, rules.properties, workflow.xml, (jar file)
 
     def Run(self):
         """
