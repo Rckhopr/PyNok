@@ -1,10 +1,22 @@
 import sys
+import time
+import datetime
 import getopt
+
+from Core.config import Pylot_Config
+from Core.steward import Steward
 
 def pylot(argv):
     """
     Command Line Interface for Pylot.
     """
+    
+    ## Create Run ID
+    RunID = datetime.datetime.fromtimestamp(int(time.time())).strftime('%Y-%m-%d %H:%M:%S')
+    
+    ## Initialize Core
+    pylot_cfg = Pylot_Config(RunID)
+    steward = Steward(pylot_cfg)
     
     ## Raise error if invalid arguments are given
     try:
