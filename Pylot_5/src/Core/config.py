@@ -1,4 +1,5 @@
 import os
+from Settings import environment
 ### Eventually replace this with a real .cfg file and parser instead of just importing
 
 class Pylot_Config():
@@ -20,13 +21,13 @@ class Pylot_Config():
         self.dir_settings = self.dir_pylot + "Settings/"
         self.dir_components = self.dir_pylot + "Components/"
         self.dir_tests = self.dir_pylot + "Tests/"
-        self.dir_run = self.dir_tests + "TestRun_" + str(self.runID) + "/"
-        self.dir_logs = self.dir_run + "Logs/"
+        self.dir_testrun = self.dir_tests + "TestRun_" + str(self.runID) + "/"
+        self.dir_logs = self.dir_testrun + "Logs/"
         
         ## Hadoop settings
         ##### SACHI II ####
-        self.hdfs_jobTracker = "schisadn100.hq.navteq.com:8021"
-        self.hdfs_nameNode = "hdfs://dev3dhdfs1"
-        self.hdfs_directory = self.hdfs_nameNode + "/user/robottest/Josh/p_test/"
-        self.hdfs_oozie_interface = "http://schisadn101:11000/oozie/"
-
+        ## TODO: Seperate class?
+        self.hdfs_jobTracker = environment.hdfs_jobTracker
+        self.hdfs_nameNode = environment.hdfs_nameNode
+        self.hdfs_directory = environment.hdfs_directory
+        self.hdfs_oozie_interface = environment.hdfs_oozie_interface

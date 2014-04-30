@@ -1,63 +1,38 @@
-from steward import *
 import re
 
-
-class Pylot_Component(CoPylot):
+class TestComponent():
     """
-    This is a shell class that all Components are derived from.
-    """ 
-    def __init__(self):
-        pass
+    Base component class.
+    Other components, e.g. EC-Val, will inherit from this. 
+    """
+    def __init__(self, steward):
+        """
+        Requires a Steward and a Pylot_Config
+        """
+        self.steward = steward
     
     ## assert(0) because this class should never be directly used.
     def Deploy(self):
+        """
+        Deploy the component. Required function.
+        """
         assert(0)
     
     def Configure(self):
-        assert(0)
-    
-    def Run(self):
-        assert(0)
-    
-    
-    #### Generic Functions
-    def _get_component(self, path, target, unzip):
         """
-        Gets the requested components, and unzips if it asked.
-        path: directory where component can be found
-        target: name of file to copy
-        unzip: True/False, whether or not to unzip the file
+        Configure the environment. Required function.
         """
-        echo('Grabbing component from ' + path + target + ' and putting it in: ' + pylot_cfg.working_directory)
-        call('cp ' + path + target + ' ' + pylot_cfg.working_directory)
-        call('chmod 777 ' + pylot_cfg.working_directory + '*.zip')
-        if unzip:
-            echo('Unzipping...')
-            call('unzip ' + pylot_cfg.working_directory + target + ' -d ' + pylot_cfg.working_directory)
-
-
-class Pylot_TestCase(CoPylot):
-    """
-    Base TestCase class that Test Cases are derived from.
-    """
-    def __init__(self):
-        pass
-    
-    ## assert(0) because this class should never be directly used.
-    def Config(self):
         assert(0)
     
+    ## TODO: Rename Test or RunTest?
     def Run(self):
+        """
+        Execute the component.
+        Do run configurations (e.g. set up test scenario)
+        Run tests
+        """
         assert(0)
 
-
-class CoPylot():
-    """
-    Base class that other CoPylot classes are derived from.
-    """
-    def __init__(self):
-        pass
-    
     #### Generic Functions
     ## TODO: Consider moving file read/write to steward for running in debug?
     ## May not be valuable. Perhaps giving a fake file set to use in debug?
@@ -86,10 +61,10 @@ class CoPylot():
         key_found = 'null'
         for line in lines_in:
             if key_found in setting_dict:
-                line = re.sub("<value>.*?</value>", '<value>' + setting_dict[key_found] + '</value>', line)
-                #line = line.replace('<value>*</value>', '<value>' + setting_dict[key_found] + '</value>')
+                value = setting_dict.pop(key_found)
+                line = re.sub("<value>.*?</value>", '<value>' + value + '</value>', line)
                 
-                echo('Setting ' + key_found + ' to ' + setting_dict[key_found])
+                self.steward.echo('Setting ' + key_found + ' to ' + value)
                 key_found = 'null'
             else:
                 print key_found
@@ -128,7 +103,7 @@ class CoPylot():
             for key in setting_dict:
                 if line.startswith(line + '='):
                     line = key + '=' + setting_dict[key] + '\n'
-                    echo('Setting ' + key + ' to ' + setting_dict[key])
+                    self.steward.echo('Setting ' + key + ' to ' + setting_dict[key])
                     break
             lines_out += line
 
@@ -136,3 +111,17 @@ class CoPylot():
         myfile = open(dest, 'w')
         myfile.write(lines_out)
         myfile.close()
+
+    def _get_component(self, path, target, unzip):
+        """
+        Gets the requested components, and unzips if it asked.
+        path: directory where component can be found
+        target: name of file to copy
+        unzip: True/False, whether or not to unzip the file
+        """
+        self.steward.echo('Grabbing component from ' + path + target + ' and putting it in: ' + self.steward.pylot_cfg.dir_testrun)
+        self.steward.call('cp ' + path + target + ' ' + self.steward.pylot_cfg.dir_testrun)
+        self.steward.call('chmod 777 ' + self.steward.pylot_cfg.dir_testrun + target)
+        if unzip:
+            self.steward.echo('Unzipping...')
+            self.steward.call('unzip ' + self.steward.pylot_cfg.dir_testrun + target + ' -d ' + self.steward.pylot_cfg.dir_testrun)
